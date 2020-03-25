@@ -1,0 +1,22 @@
+[package]
+
+name = "addy"
+description = "POSIX interrupt handling that is both safe and ergonomic."
+authors = ["Amy <git@xvrqt.com>"]
+
+version = "0.0.1"
+edition = "2018"
+
+
+homepage = "https://github.com/xvrqt/addy"
+repository = "https://github.com/xvrqt/addy.git"
+license-file = "LICENSE.txt"
+readme = "README.md"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lazy_static = "1.4.0"
+libc = "0.2.68"
+fnv = "1.0.6"
