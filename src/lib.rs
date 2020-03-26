@@ -3,7 +3,7 @@
 //!
 //! ## Quick Start
 //! ```no_run
-//! use addy::SIGWINCH;	
+//! use addy::SIGWINCH;
 //! use std::io::{Read, stdin};
 //! fn main() -> Result<(), addy::Error> {
 //! 	/* SIGWINCH is a POSIX interrupt signal for window resized */
@@ -950,17 +950,29 @@ fn setup() {
              * to do when a signal is called. They tell it to perform the
              * default action, ignore the signal or run the list of user
              * registered callbacks respectively.
-            	*/
-            const SA_DEFAULT: libc::sigaction = libc::sigaction {
+             */
+
+            /* Have to create a mask for the structs that enables all singals */
+            let mut sigset = std::mem::MaybeUninit::uninit();
+            let _ = unsafe { libc::sigfillset(sigset.as_mut_ptr()) };
+            let sigset = unsafe { sigset.assume_init() };
+
+            #[allow(non_snake_case)]
+            let SA_DEFAULT: libc::sigaction = libc::sigaction {
                 sa_sigaction: libc::SIG_DFL,
-                sa_mask: 0,
+                sa_mask: sigset,
                 sa_flags: libc::SA_SIGINFO,
+                #[cfg(target_os = "linux")]
+                sa_restorer: None,
             };
 
-            const SA_IGNORE: libc::sigaction = libc::sigaction {
+            #[allow(non_snake_case)]
+            let SA_IGNORE: libc::sigaction = libc::sigaction {
                 sa_sigaction: libc::SIG_IGN,
-                sa_mask: 0,
+                sa_mask: sigset,
                 sa_flags: libc::SA_SIGINFO,
+                #[cfg(target_os = "linux")]
+                sa_restorer: None,
             };
 
             /* Q: Why isn't this a constant?
@@ -968,35 +980,31 @@ fn setup() {
              * unstable. (Yes I tried the various workarounds)
              *
              * Link: https://github.com/rust-lang/rust/issues/51910
-            	*/
+             */
             #[allow(non_snake_case)]
             let SA_CALLBACK: libc::sigaction = libc::sigaction {
                 sa_sigaction: c_handler as libc::sighandler_t,
-                sa_mask: 0,
+                sa_mask: sigset,
                 sa_flags: libc::SA_SIGINFO,
+                #[cfg(target_os = "linux")]
+                sa_restorer: None,
             };
 
             /***************************************
              * HELPER FUNCTIONS TO KEEP THINGS DRY *
              ***************************************/
+            /* Switched to helper closures because some architectures need
+             * a proper sa_mask generated to compile.
+             */
+
             /* Tells the process to ignore the interrupt */
-            fn ignore(signal: Signal) {
-                /* SA_IGN is a static sigaction struct with a
-                 * special ignore handler value.
-                	*/
-                unsafe {
-                    libc::sigaction(signal as libc::c_int, &SA_IGNORE, std::ptr::null_mut());
-                }
-            }
+            let ignore = move |signal: Signal| unsafe {
+                libc::sigaction(signal as libc::c_int, &SA_IGNORE, std::ptr::null_mut());
+            };
             /* Sets the interrupt handler to the default value */
-            fn default(signal: Signal) {
-                /* SA_DFL is a static sigaction struct with a
-                 * special reset to default handler value.
-                	*/
-                unsafe {
-                    libc::sigaction(signal as libc::c_int, &SA_DEFAULT, std::ptr::null_mut());
-                }
-            }
+            let default = move |signal: Signal| unsafe {
+                libc::sigaction(signal as libc::c_int, &SA_DEFAULT, std::ptr::null_mut());
+            };
             /* Trys to convert a Signal to a USize to index into active[] */
             fn index(signal: Signal) -> usize {
                 usize::try_from(signal as libc::c_int).unwrap()
@@ -1004,11 +1012,11 @@ fn setup() {
             /* Resets all signals to their default behaviour. Does not clear out
              * registered handlers.
             	*/
-            fn set_all_to_default() {
+            let set_all_to_default = || {
                 for signal in Signal::iterator() {
                     default(signal);
                 }
-            }
+            };
 
             /*********
              * PANIC *
@@ -1090,7 +1098,7 @@ fn setup() {
 
             /* If the thread closes - set all the singals back to their default
              * behavior and remove all callbacks.
-            */
+             */
             set_all_to_default();
         }); // </Thread>
     }); // </Once>
@@ -1098,11 +1106,11 @@ fn setup() {
     /* There's a chance that the ONCE call actually initialized something else
      * and that we're not ready so we spin until we are. Probably not necessary.
      *
-     * Apparently it's only available on nightly, but is merged in and will be 
+     * Apparently it's only available on nightly, but is merged in and will be
      * stable shortly. See link below for detail:
-     * 
+     *
      * Link: https://github.com/rust-lang/rust/issues/54890
-    */
+     */
     #[cfg(feature = "nightly")]
     while !SETUP.is_completed() { /*-- ᓚᘏᗢ --*/ }
 }
