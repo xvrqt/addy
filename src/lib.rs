@@ -344,7 +344,7 @@ impl Signal {
     /// and not bound to `self`'s lifetime.
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::SIGINT;
     ///
     /// fn main() {
@@ -450,7 +450,7 @@ const NUM_SIGNALS: libc::c_int = 32;
 /// Useful if you want to set every signal to "Ignore" or "Default."
 ///
 /// # Example
-/// ```no_run
+/// ```
 /// use addy::Signal;
 ///
 /// fn main() -> Result<(), addy::Error> {
@@ -499,17 +499,7 @@ impl Signal {
  * the Event Loop.
 */
 type CVoid = *mut libc::c_void;
-fn c_handler(signal: Signal, info: *mut libc::siginfo_t, ucontext: CVoid) {
-    /* Free the pointers to the info_t and ucontenxt_t structs returned to us */
-    unsafe {
-        if info != std::ptr::null_mut() {
-            libc::free(info as CVoid);
-        }
-        if ucontext != std::ptr::null_mut() {
-            libc::free(ucontext);
-        }
-    }
-
+fn c_handler(signal: Signal, _info: CVoid, _ucontext: CVoid) {
     /* We're the only function that interacts with this global static copy of
      * a sender to the Event Loop. We only read from this location, only one
      * interrupt can be active at a time so this is SAFE.
@@ -547,7 +537,7 @@ fn c_handler(signal: Signal, info: *mut libc::siginfo_t, ucontext: CVoid) {
 /// again (after re-registering new callbacks).
 ///
 /// # Example
-/// ```no_run
+/// ```
 /// use addy::{Signal, SIGWINCH};
 ///
 /// fn my_func(signal: Signal) {
@@ -591,7 +581,7 @@ impl SignalHandle {
     /// previous callback.
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::{Signal, SIGWINCH};
     ///
     /// fn my_func(signal: Signal) {
@@ -625,7 +615,7 @@ impl SignalHandle {
     /// that name exists, it does nothing.
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::{Signal, SIGWINCH};
     ///
     /// fn my_func(signal: Signal) {
@@ -662,7 +652,7 @@ impl SignalHandle {
     /// new callbacks later.
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::{Signal, SIGWINCH};
     ///
     /// fn my_func(signal: Signal) {
@@ -699,7 +689,7 @@ impl SignalHandle {
     /// You will need to call .enable() again after re-registering callbacks.
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::SIGWINCH;
     ///
     /// fn main() -> Result<(), addy::Error> {
@@ -733,7 +723,7 @@ impl SignalHandle {
     /// Calling .resume() will re-enable them.
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::SIGWINCH;
     ///
     /// fn main() -> Result<(), addy::Error> {
@@ -766,7 +756,7 @@ impl SignalHandle {
     /// your callbacks. Calling .resume() will re-enable them.
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::SIGINT;
     ///
     /// fn main() -> Result<(), addy::Error> {
@@ -800,7 +790,7 @@ impl SignalHandle {
     /// Alias of .enable()
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::SIGINT;
     ///
     /// fn main() -> Result<(), addy::Error> {
@@ -834,7 +824,7 @@ impl SignalHandle {
     /// Alias of .resume()
     ///
     /// # Example
-    /// ```no_run
+    /// ```
     /// use addy::SIGINT;
     ///
     /// fn main() -> Result<(), addy::Error> {
