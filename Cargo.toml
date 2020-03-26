@@ -4,14 +4,17 @@ name = "addy"
 description = "POSIX interrupt handling that is both safe and ergonomic."
 authors = ["Amy <git@xvrqt.com>"]
 
-version = "0.0.1"
+version = "0.1.0"
 edition = "2018"
-
 
 homepage = "https://github.com/xvrqt/addy"
 repository = "https://github.com/xvrqt/addy.git"
+documentation = "https://docs.rs/crate/addy/0.1.0"
 license-file = "LICENSE.txt"
 readme = "README.md"
+
+keywords = ["interrupt handlers", "interrupt", "event loop", "builder", "signals", "POSIX"]
+categories = ["api-bindings", "external-ffi-bindings", "os", "os::macos-apis", "os::unix-apis"]
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
