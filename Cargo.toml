@@ -13,7 +13,7 @@ documentation = "https://docs.rs/crate/addy/0.1.0"
 license-file = "LICENSE.txt"
 readme = "README.md"
 
-keywords = ["interrupt handlers", "interrupt", "event loop", "builder", "signals", "POSIX"]
+keywords = ["interrupt", "builder", "signals", "POSIX", "xvrqt"]
 categories = ["api-bindings", "external-ffi-bindings", "os", "os::macos-apis", "os::unix-apis"]
 
 
