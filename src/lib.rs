@@ -3,7 +3,7 @@
 //!
 //! ## Quick Start
 //! ```no_run
-//! use addy::SIGWINCH;
+//! use addy::SIGWINCH;	
 //! use std::io::{Read, stdin};
 //! fn main() -> Result<(), addy::Error> {
 //! 	/* SIGWINCH is a POSIX interrupt signal for window resized */
@@ -1090,14 +1090,20 @@ fn setup() {
 
             /* If the thread closes - set all the singals back to their default
              * behavior and remove all callbacks.
-            	*/
+            */
             set_all_to_default();
         }); // </Thread>
     }); // </Once>
 
     /* There's a chance that the ONCE call actually initialized something else
-     * and that we're not ready so we spin until we are.
-    	*/
+     * and that we're not ready so we spin until we are. Probably not necessary.
+     *
+     * Apparently it's only available on nightly, but is merged in and will be 
+     * stable shortly. See link below for detail:
+     * 
+     * Link: https://github.com/rust-lang/rust/issues/54890
+    */
+    #[cfg(feature = "nightly")]
     while !SETUP.is_completed() { /*-- ᓚᘏᗢ --*/ }
 }
 
